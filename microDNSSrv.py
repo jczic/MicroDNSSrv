@@ -132,7 +132,7 @@ class MicroDNSSrv :
                 packet[:2],             # Query identifier
                 b'\x81\x80',            # Flags and codes
                 packet[4:6],            # Query question count
-                b'\x00\x01',            # Query question count
+                b'\x00\x01',            # Answer record count
                 b'\x00\x00',            # Authority record count
                 b'\x00\x00',            # Additional record count
                 packet[12:],            # Query question
