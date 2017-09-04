@@ -1,6 +1,7 @@
 
-from    _thread import start_new_thread
-import  socket
+from   _thread import start_new_thread
+import socket
+import gc
 
 class MicroDNSSrv :
 
@@ -31,18 +32,18 @@ class MicroDNSSrv :
         while True :
             try :
                 packet, cliAddr = self._server.recvfrom(256)
+                domName = self._getAskedDomainName(packet)
+                if domName :
+                    ipB = self._domList.get(domName.lower(), None)
+                    if not ipB :
+                        ipB = self._domList.get('*', None)
+                    if ipB :
+                        packet = self._getPacketAnswerA(packet, ipB)
+                        if packet :
+                            self._server.sendto(packet, cliAddr)
             except :
-                break
-            domName = self._getAskedDomainName(packet)
-            if domName is not None :
-                ipB = self._domList.get(domName.lower(), None)
-                if ipB is None :
-                    ipB = self._domList.get('*', None)
-                if ipB is not None :
-                    packet = self._getPacketAnswerA(packet, ipB)
-                    if packet is not None :
-                        self._server.sendto(packet, cliAddr)
-        self._started = False
+                if not self._started :
+                    break
 
     # ============================================================================
     # ===( Functions )============================================================
@@ -58,27 +59,32 @@ class MicroDNSSrv :
                                      1 )
             self._server.bind(('0.0.0.0', 53))
             self._server.setblocking(True)
-            start_new_thread(self._serverProcess, ())
-            return True
+            return _tryStartThread(self._serverProcess)
         return False
 
     # ----------------------------------------------------------------------------
 
     def Stop(self) :
         if self._started :
+            self._started = False
             self._server.close()
             return True
         return False
 
     # ----------------------------------------------------------------------------
 
+    def IsStarted(self) :
+        return self._started
+
+    # ----------------------------------------------------------------------------
+
     def SetDomainsList(self, domainsList) :
-        if domainsList is not None and isinstance(domainsList, dict) :
+        if domainsList and isinstance(domainsList, dict) :
             o = { }
             for dom, ip in domainsList.items() :
                 if isinstance(dom, str) and len(dom) > 0 :
                     ipB = self._ipV4StrToBytes(ip)
-                    if ipB is not None :
+                    if ipB :
                         o[dom.lower()] = ipB
                         continue
                 break
@@ -90,6 +96,18 @@ class MicroDNSSrv :
     # ============================================================================
     # ===( Utils )================================================================
     # ============================================================================
+
+    def _tryStartThread(self, func, args=()) :
+        for x in range(10) :
+            try :
+                gc.collect()
+                start_new_thread(func, args)
+                return True
+            except :
+                pass
+        return False
+
+    # ----------------------------------------------------------------------------
 
     def _ipV4StrToBytes(self, ipStr) :
         try :
@@ -130,7 +148,7 @@ class MicroDNSSrv :
         try :
             return b''.join( [
                 packet[:2],             # Query identifier
-                b'\x81\x80',            # Flags and codes
+                b'\x85\x80',            # Flags and codes
                 packet[4:6],            # Query question count
                 b'\x00\x01',            # Answer record count
                 b'\x00\x00',            # Authority record count
