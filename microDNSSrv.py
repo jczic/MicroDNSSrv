@@ -1,3 +1,7 @@
+"""
+The MIT License (MIT)
+Copyright © 2018 Jean-Christophe Bos & HC² (www.hc2.fr)
+"""
 
 from   _thread import start_new_thread
 import socket
@@ -26,7 +30,16 @@ class MicroDNSSrv :
                 start_new_thread(func, args)
                 return True
             except :
-                pass
+                global _dns_thread_id
+                try :
+                    _dns_thread_id += 1
+                except :
+                    _dns_thread_id = 0
+                try :
+                    start_new_thread('DNS_THREAD_%s' % _dns_thread_id, func, args)
+                    return True
+                except :
+                    pass
         return False
 
     # ----------------------------------------------------------------------------
