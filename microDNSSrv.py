@@ -80,7 +80,17 @@ class MicroDNSSrv :
     # ----------------------------------------------------------------------------
 
     def _getPacketAnswerA(packet, ipV4Bytes) :
+        
         try :
+
+            queryEndPos = 12
+            while True :
+                domPartLen = packet[queryEndPos]
+                if (domPartLen == 0) :
+                    break
+                queryEndPos += 1 + domPartLen
+            queryEndPos += 5
+
             return b''.join( [
                 packet[:2],             # Query identifier
                 b'\x85\x80',            # Flags and codes
@@ -88,15 +98,17 @@ class MicroDNSSrv :
                 b'\x00\x01',            # Answer record count
                 b'\x00\x00',            # Authority record count
                 b'\x00\x00',            # Additional record count
-                packet[12:],            # Query question
+                packet[12:queryEndPos], # Query question
                 b'\xc0\x0c',            # Answer name as pointer
                 b'\x00\x01',            # Answer type A
                 b'\x00\x01',            # Answer class IN
                 b'\x00\x00\x00\x1E',    # Answer TTL 30 secondes
                 b'\x00\x04',            # Answer data length
                 ipV4Bytes ] )           # Answer data
+        
         except :
             pass
+        
         return None
 
     # ============================================================================
