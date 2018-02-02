@@ -4,6 +4,7 @@ Copyright © 2018 Jean-Christophe Bos & HC² (www.hc2.fr)
 """
 
 from   _thread import start_new_thread
+from   re      import match
 import socket
 import gc
 
@@ -130,9 +131,17 @@ class MicroDNSSrv :
                 packet, cliAddr = self._server.recvfrom(256)
                 domName = MicroDNSSrv._getAskedDomainName(packet)
                 if domName :
-                    ipB = self._domList.get(domName.lower(), None)
+                    domName = domName.lower()
+                    ipB = self._domList.get(domName, None)
                     if not ipB :
                         ipB = self._domList.get('*', None)
+                    if not ipB :
+                        for domChk in self._domList.keys() :
+                            if domChk.find('*') >= 0 :
+                                r = domChk.replace('.', '\.').replace('*', '.+') + '$'
+                                if match(r, domName) :
+                                    ipB = self._domList.get(domChk, None)
+                                    break
                     if ipB :
                         packet = MicroDNSSrv._getPacketAnswerA(packet, ipB)
                         if packet :
