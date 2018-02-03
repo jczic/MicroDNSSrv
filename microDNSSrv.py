@@ -138,7 +138,7 @@ class MicroDNSSrv :
                     if not ipB :
                         for domChk in self._domList.keys() :
                             if domChk.find('*') >= 0 :
-                                r = domChk.replace('.', '\.').replace('*', '.+') + '$'
+                                r = domChk.replace('.', '\.').replace('*', '.*') + '$'
                                 if match(r, domName) :
                                     ipB = self._domList.get(domChk, None)
                                     break
