@@ -134,14 +134,14 @@ class MicroDNSSrv :
                     domName = domName.lower()
                     ipB = self._domList.get(domName, None)
                     if not ipB :
-                        ipB = self._domList.get('*', None)
-                    if not ipB :
                         for domChk in self._domList.keys() :
                             if domChk.find('*') >= 0 :
                                 r = domChk.replace('.', '\.').replace('*', '.*') + '$'
                                 if match(r, domName) :
                                     ipB = self._domList.get(domChk, None)
                                     break
+                        if not ipB :
+                            ipB = self._domList.get('*', None)
                     if ipB :
                         packet = MicroDNSSrv._getPacketAnswerA(packet, ipB)
                         if packet :
