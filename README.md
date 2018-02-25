@@ -60,6 +60,6 @@ MicroDNSSrv.Create({ '*' : '192.168.0.254' })
 
 
 
-### By JC`zic ;')
+### By JC`zic for [HC²](https://www.hc2.fr) ;')
 
 *Keep it simple, stupid* :+1:
