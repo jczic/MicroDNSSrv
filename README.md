@@ -58,7 +58,7 @@ else :
 ```python
 MicroDNSSrv.Create({ '*' : '192.168.0.254' })
 ```
-- Can be used with [MicroWebSrv](https://github.com/jczic/MicroWebSrv) easily.
+- Can be used with [MicroWebSrv](http://microwebsrv.hc2.fr) easily.
 
 
 
