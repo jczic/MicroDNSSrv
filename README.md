@@ -1,5 +1,7 @@
 # MicroDNSSrv
 
+![HC²](hc2.png "HC²")
+
 ### A Micro DNS Server for MicroPython to simply respond to A queries (principally used on ESP32 and [Pycom](http://www.pycom.io) modules)
 
 Very easy to integrate and very light with one file only :
